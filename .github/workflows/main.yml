@@ -30,6 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install pytest
+        pip install faker
 
     # Kör generate.py (skapar data.json)
     - name: Run generate.py
