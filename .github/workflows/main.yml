@@ -16,7 +16,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
-      name: github-pages   
+      name: github-pages
 
     steps:
     - uses: actions/checkout@v3
@@ -35,15 +35,15 @@ jobs:
         pip install pytest
         pip install faker
 
-    # Kör generate.py (skapar data.json)
+    # Kör generate.py (skapar ev. data.json)
     - name: Run generate.py
       run: python generate.py
 
-    # Kör csvtojson.py (skapar t.ex. data.json från CSV)
+    # Kör csvtojson.py (skapar profiles.json)
     - name: Run csvtojson.py
       run: python csvtojson.py
 
-    # Kör alla tester
+    # Kör alla tester (lägg till dina testfiler här)
     - name: Run tests
       run: pytest
 
@@ -52,7 +52,8 @@ jobs:
       run: |
         mkdir -p dist
         cp index.html dist/index.html
-        cp data.json dist/data.json
+        # Om det är profiles.json som är rätt fil, döp om den till data.json när du kopierar:
+        cp profiles.json dist/data.json
         cp script.js dist/script.js
 
     # Setup Pages
