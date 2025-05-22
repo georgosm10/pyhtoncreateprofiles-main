@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: CI/CD Deployment to GitHub Pages
 
 on:
   push:
-    branches: ["main"]  # Kör bara när du pushar till "main"
+    branches: [ "main" ]  # Kör endast på main för att undvika onödiga körningar
 
 permissions:
   pages: write
@@ -11,29 +11,36 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+
     steps:
       # Steg 1: Checka ut koden
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      # Steg 2: Installera Python (om du behöver köra skript)
+      # Steg 2: Installera Python + beroenden (om du behöver köra skript)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10"
+          python-version: '3.10'
 
-      # Steg 3: Kör dina Python-skript (om du har dem)
+      - name: Install dependencies
+        run: |
+          pip install pytest faker
+
+      # Steg 3: Kör dina skript (anpassa efter behov)
       - name: Convert CSV to JSON
         run: python csvtojson.py  # Skapar profiles.json
 
-      # Steg 4: Kopiera filer till dist-mappen
-      - name: Copy files to dist
+      # Steg 4: Kopiera filer till dist (enklare version)
+      - name: Prepare dist folder
         run: |
           mkdir -p dist
-          cp index.html dist/
-          cp profiles.json dist/data.json
-          cp script.js dist/
+          cp index.html script.js profiles.json dist/
+          mv dist/profiles.json dist/data.json  # Byt namn
 
-      # Steg 5: Deploya till GitHub Pages
+      # Steg 5: Deploya
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
+        with:
+          artifact_name: 'web-app'  # Valfritt men tydligare
