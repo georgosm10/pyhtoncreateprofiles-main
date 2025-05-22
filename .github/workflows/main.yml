@@ -2,7 +2,7 @@ name: CICD
 
 on:
   push:
-    branches: [ "main", "test-branch" ]
+    branches: [ "main", "test-branch", "csvtojson-feature" ]
   pull_request:
     branches: [ "main" ]
 
@@ -16,7 +16,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
-      name: github-pages   # <-- DENNA RAD SAKNAS HOS DIG! LÄGG IN DEN HÄR
+      name: github-pages   
 
     steps:
     - uses: actions/checkout@v3
@@ -29,34 +29,45 @@ jobs:
     - name: Print Hello world! (kan vara kvar!)
       run: echo Hello, world!
 
+    # Installera dependencies
     - name: Install dependencies
       run: |
         pip install pytest
         pip install faker
 
+    # Kör generate.py (skapar data.json)
     - name: Run generate.py
       run: python generate.py
 
+    # Kör csvtojson.py (skapar t.ex. data.json från CSV)
+    - name: Run csvtojson.py
+      run: python csvtojson.py
+
+    # Kör alla tester
     - name: Run tests
       run: pytest
 
+    # Bygg sajten genom att kopiera till dist
     - name: Copy to dist
       run: |
-        mkdir dist
+        mkdir -p dist
         cp index.html dist/index.html
         cp data.json dist/data.json
         cp script.js dist/script.js
 
+    # Setup Pages
     - name: Setup Pages
       uses: actions/configure-pages@v5
 
+    # Ladda upp dist-artifact
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: 'dist'
 
+    # Deploya till GitHub Pages
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
 
-# (Kommentarer går bra att lämna kvar!)
+# (Kommentarer kan vara kvar!)
