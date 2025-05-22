@@ -1,4 +1,4 @@
-name: CICD
+name: CI/CD Deployment to GitHub Pages
 
 on:
   push:
@@ -19,48 +19,56 @@ jobs:
       name: github-pages
 
     steps:
+    # Steg 1: Checka ut koden
     - uses: actions/checkout@v3
 
+    # Steg 2: Sätt upp Python
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Print Hello world! (kan vara kvar!)
-      run: echo Hello, world!
-
+    # Steg 3: Installera beroenden
     - name: Install dependencies
       run: |
         pip install pytest
         pip install faker
 
-    # Kör generate.py om du använder den (kan vara kvar, inget problem)
-    - name: Run generate.py
-      run: python generate.py
+    # Steg 4: Generera/uppdatera data (om nödvändigt)
+    - name: Run generate.py (Optional)
+      run: python generate.py  # Ta bort om du inte använder denna
 
-    # Skapa profiles.json från profiles1.csv
+    # Steg 5: Konvertera CSV till JSON (om nödvändigt)
     - name: Run csvtojson.py
-      run: python csvtojson.py
+      run: python csvtojson.py  # Skapar/uppdaterar profiles.json
 
+    # Steg 6: Kör tester
     - name: Run tests
       run: pytest
 
-    # Bygg sajten – kopiera profiles.json och döp om den till data.json!
-    - name: Copy to dist
+    # Steg 7: Kopiera till dist (Uppdatera endast om filerna ändrats)
+    - name: Sync files to dist
       run: |
-        mkdir -p dist
-        cp index.html dist/index.html
-        cp profiles.json dist/data.json     # <-- Denna rad gör att rätt data syns!
-        cp script.js dist/script.js
+        # Uppdatera endast om filerna är nyare än i dist/
+        cp -u index.html dist/index.html || echo "Ingen ändring i index.html"
+        cp -u profiles.json dist/data.json || echo "Ingen ändring i profiles.json"
+        cp -u script.js dist/script.js || echo "Ingen ändring i script.js"
 
+    # Steg 8: Debugga innehållet i dist (valfritt)
+    - name: List dist contents
+      run: ls -l dist/
+
+    # Steg 9: Förbered GitHub Pages
     - name: Setup Pages
       uses: actions/configure-pages@v5
 
+    # Steg 10: Ladda upp artifact
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: 'dist'
+        path: 'dist'  # Se till att den pekar på din dist-mapp
 
+    # Steg 11: Deploya
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
