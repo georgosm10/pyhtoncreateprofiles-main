@@ -15,7 +15,6 @@ jobs:
   build:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    
 
     steps:
     - uses: actions/checkout@v3
@@ -28,23 +27,17 @@ jobs:
     - name: Print Hello world! (kan vara kvar!)
       run: echo Hello, world!
 
-    # Lägg till installation av tester
     - name: Install dependencies
       run: |
         pip install pytest
         pip install faker
 
-    # Kör generate.py (skapar data.json)
     - name: Run generate.py
       run: python generate.py
 
-    # (senare) Run csvtojson.py här!
-
-    # Kör tester
     - name: Run tests
       run: pytest
 
-    # Bygg sajten
     - name: Copy to dist
       run: |
         mkdir dist
@@ -63,26 +56,5 @@ jobs:
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-        
-      # lägg till create csv file (glöm inte pip install)
-      # lägg till Create JSON file
-      # Köra enhetstester     
-      #python .\calculateTests.py 
-      - name: Copy to dist
-        run: |
-          mkdir dist
-          cp index.html dist/index.html
-          cp data.json dist/data.json
-          cp script.js dist/script.js      
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: 'dist'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
 
-# Small change to trigger deploy
-# Small change to trigger deploy
+# (Kommentarer går bra att lämna kvar!)
