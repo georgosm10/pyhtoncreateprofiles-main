@@ -1,74 +1,39 @@
-name: CI/CD Deployment to GitHub Pages
+name: Deploy to GitHub Pages
 
 on:
   push:
-    branches: [ "main", "test-branch", "csvtojson-feature" ]
-  pull_request:
-    branches: [ "main" ]
+    branches: ["main"]  # Kör bara när du pushar till "main"
 
 permissions:
-  id-token: write
   pages: write
   contents: read
 
 jobs:
-  build:
-    if: github.ref == 'refs/heads/main'
+  deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-
     steps:
-    # Steg 1: Checka ut koden
-    - uses: actions/checkout@v3
+      # Steg 1: Checka ut koden
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    # Steg 2: Sätt upp Python
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.10'
+      # Steg 2: Installera Python (om du behöver köra skript)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
 
-    # Steg 3: Installera beroenden
-    - name: Install dependencies
-      run: |
-        pip install pytest
-        pip install faker
+      # Steg 3: Kör dina Python-skript (om du har dem)
+      - name: Convert CSV to JSON
+        run: python csvtojson.py  # Skapar profiles.json
 
-    # Steg 4: Generera/uppdatera data (om nödvändigt)
-    - name: Run generate.py (Optional)
-      run: python generate.py  # Ta bort om du inte använder denna
+      # Steg 4: Kopiera filer till dist-mappen
+      - name: Copy files to dist
+        run: |
+          mkdir -p dist
+          cp index.html dist/
+          cp profiles.json dist/data.json
+          cp script.js dist/
 
-    # Steg 5: Konvertera CSV till JSON (om nödvändigt)
-    - name: Run csvtojson.py
-      run: python csvtojson.py  # Skapar/uppdaterar profiles.json
-
-    # Steg 6: Kör tester
-    - name: Run tests
-      run: pytest
-
-    # Steg 7: Kopiera till dist (Uppdatera endast om filerna ändrats)
-    - name: Sync files to dist
-      run: |
-        # Uppdatera endast om filerna är nyare än i dist/
-        cp -u index.html dist/index.html || echo "Ingen ändring i index.html"
-        cp -u profiles.json dist/data.json || echo "Ingen ändring i profiles.json"
-        cp -u script.js dist/script.js || echo "Ingen ändring i script.js"
-
-    # Steg 8: Debugga innehållet i dist (valfritt)
-    - name: List dist contents
-      run: ls -l dist/
-
-    # Steg 9: Förbered GitHub Pages
-    - name: Setup Pages
-      uses: actions/configure-pages@v5
-
-    # Steg 10: Ladda upp artifact
-    - name: Upload artifact
-      uses: actions/upload-pages-artifact@v3
-      with:
-        path: 'dist'  # Se till att den pekar på din dist-mapp
-
-    # Steg 11: Deploya
-    - name: Deploy to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+      # Steg 5: Deploya till GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
