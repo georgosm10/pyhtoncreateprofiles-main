@@ -29,46 +29,38 @@ jobs:
     - name: Print Hello world! (kan vara kvar!)
       run: echo Hello, world!
 
-    # Installera dependencies
     - name: Install dependencies
       run: |
         pip install pytest
         pip install faker
 
-    # Kör generate.py (skapar ev. data.json)
+    # Kör generate.py om du använder den (kan vara kvar, inget problem)
     - name: Run generate.py
       run: python generate.py
 
-    # Kör csvtojson.py (skapar profiles.json)
+    # Skapa profiles.json från profiles1.csv
     - name: Run csvtojson.py
       run: python csvtojson.py
 
-    # Kör alla tester (lägg till dina testfiler här)
     - name: Run tests
       run: pytest
 
-    # Bygg sajten genom att kopiera till dist
+    # Bygg sajten – kopiera profiles.json och döp om den till data.json!
     - name: Copy to dist
       run: |
         mkdir -p dist
         cp index.html dist/index.html
-        # Om det är profiles.json som är rätt fil, döp om den till data.json när du kopierar:
-        cp profiles.json dist/data.json
+        cp profiles.json dist/data.json     # <-- Denna rad gör att rätt data syns!
         cp script.js dist/script.js
 
-    # Setup Pages
     - name: Setup Pages
       uses: actions/configure-pages@v5
 
-    # Ladda upp dist-artifact
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
         path: 'dist'
 
-    # Deploya till GitHub Pages
     - name: Deploy to GitHub Pages
       id: deployment
       uses: actions/deploy-pages@v4
-
-# (Kommentarer kan vara kvar!)
