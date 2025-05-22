@@ -2,11 +2,12 @@ name: CI/CD Deployment to GitHub Pages
 
 on:
   push:
-    branches: [ "main" ]  # Kör endast på main för att undvika onödiga körningar
+    branches: [ "main" ]  # Kör bara på main-grenen
 
 permissions:
-  pages: write
   contents: read
+  pages: write
+  id-token: write  # Detta är den kritiska behörigheten som saknades
 
 jobs:
   deploy:
@@ -18,29 +19,27 @@ jobs:
       # Steg 1: Checka ut koden
       - uses: actions/checkout@v3
 
-      # Steg 2: Installera Python + beroenden (om du behöver köra skript)
+      # Steg 2: Installera Python (om du behöver köra skript)
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
+      # Steg 3: Installera beroenden
       - name: Install dependencies
-        run: |
-          pip install pytest faker
+        run: pip install pytest faker
 
-      # Steg 3: Kör dina skript (anpassa efter behov)
-      - name: Convert CSV to JSON
-        run: python csvtojson.py  # Skapar profiles.json
+      # Steg 4: Kör dina skript
+      - name: Run csvtojson.py
+        run: python csvtojson.py
 
-      # Steg 4: Kopiera filer till dist (enklare version)
+      # Steg 5: Förbered dist-mappen
       - name: Prepare dist folder
         run: |
           mkdir -p dist
           cp index.html script.js profiles.json dist/
-          mv dist/profiles.json dist/data.json  # Byt namn
+          mv dist/profiles.json dist/data.json
 
-      # Steg 5: Deploya
+      # Steg 6: Deploya
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
-        with:
-          artifact_name: 'web-app'  # Valfritt men tydligare
